@@ -43,4 +43,9 @@ class CategoryController extends Controller
         $category->delete();
         return response()->json(['message' => 'Category deleted successfully.'], 200);
     }
+
+    public function getActiveCategories() {
+        $categories = Category::where('status', 'active')->get();
+        return CategoryResource::collection($categories);
+    }
 }
