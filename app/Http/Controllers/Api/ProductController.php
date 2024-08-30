@@ -51,27 +51,14 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, Product $product)
     {
-        try {
-            DB::beginTransaction();
-            $product->update($request->validated());
-            $product->categories()->sync($request->categories);
-            $product->features()->delete();
-
-            foreach ($request->features as $feature) {
-                $product->features()->create(['name' => $feature]);
-            }
-            if ($request->hasFile('image')) {
-                $product->clearMediaCollection('product_images');
-                $product->addMediaFromRequest('image')->toMediaCollection('product_images');
-            }
-            $product->load('media');
-            DB::commit();
-
-            return new ProductResource($product->load('categories', 'features'));
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Failed to update product'], 500);
+        $product->update(['title' => $request->title]);
+        if ($request->hasFile('image')) {
+            $product->clearMediaCollection('product_images');
+            $product->addMediaFromRequest('image')->toMediaCollection('product_images');
         }
+        $product->load('media');
+
+        return new ProductResource($product->load('categories', 'features'));
     }
 
     public function destroy($productId)

@@ -22,36 +22,36 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'        => 'sometimes|string|max:255|unique:products,title,' . $this->route('product')->id,
-            'status'       => 'required|in:active,inactive',
-            'categories'   => 'required|array',
-            'categories.*' => 'exists:categories,id',
-            'features'     => 'required|array',
-            'features.*'   => 'string|max:255',
+            'title'        => 'required|string|max:255|unique:products,title,' . $this->route('product')->id,
+            // 'status'       => 'required|in:active,inactive',
+            // 'categories'   => 'required|array',
+            // 'categories.*' => 'exists:categories,id',
+            // 'features'     => 'required|array',
+            // 'features.*'   => 'string|max:255',
            'image'         => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ];
     }
 
-    public function messages()
-    {
-        return [
-            'status.in' => 'The status must be either active or inactive.'
-        ];
-    }
+    // public function messages()
+    // {
+    //     return [
+    //         'status.in' => 'The status must be either active or inactive.'
+    //     ];
+    // }
 
-    protected function prepareForValidation()
-    {
+    // protected function prepareForValidation()
+    // {
        
-        $categories = $this->input('categories');
-        if (is_string($categories)) {
-            $categoriesArray = array_map('trim', explode(',', $categories));
-            $this->merge(['categories' => $categoriesArray]);
-        }
+    //     $categories = $this->input('categories');
+    //     if (is_string($categories)) {
+    //         $categoriesArray = array_map('trim', explode(',', $categories));
+    //         $this->merge(['categories' => $categoriesArray]);
+    //     }
 
-        $features = $this->input('features');
-        if (is_string($features)) {
-            $featuresArray = array_map('trim', explode(',', $features));
-            $this->merge(['features' => $featuresArray]);
-        }
-    }
+    //     $features = $this->input('features');
+    //     if (is_string($features)) {
+    //         $featuresArray = array_map('trim', explode(',', $features));
+    //         $this->merge(['features' => $featuresArray]);
+    //     }
+    // }
 }
