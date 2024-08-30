@@ -35,7 +35,32 @@ class StoreProductRequest extends FormRequest
     public function messages()
     {
         return [
-            'status.in' => 'The status must be either active or inactive.'
+            'status.in' => 'The status must be either active or inactive.',
+            'categories.array' => 'Categories must be an array.',
+            'categories.*.exists' => 'One or more categories are invalid.',
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+       
+        $categories = $this->input('categories');
+        if (is_string($categories)) {
+            $categoriesArray = array_map('trim', explode(',', $categories));
+            info($categoriesArray);
+            $this->merge(['categories' => $categoriesArray]);
+        }
+
+        $features = $this->input('features');
+        if (is_string($features)) {
+            $featuresArray = array_map('trim', explode(',', $features));
+            info($featuresArray);
+            $this->merge(['features' => $featuresArray]);
+        }
     }
 }

@@ -38,4 +38,20 @@ class UpdateProductRequest extends FormRequest
             'status.in' => 'The status must be either active or inactive.'
         ];
     }
+
+    protected function prepareForValidation()
+    {
+       
+        $categories = $this->input('categories');
+        if (is_string($categories)) {
+            $categoriesArray = array_map('trim', explode(',', $categories));
+            $this->merge(['categories' => $categoriesArray]);
+        }
+
+        $features = $this->input('features');
+        if (is_string($features)) {
+            $featuresArray = array_map('trim', explode(',', $features));
+            $this->merge(['features' => $featuresArray]);
+        }
+    }
 }
