@@ -7,7 +7,6 @@ use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
-use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -30,11 +29,8 @@ class CategoryController extends Controller
         return new CategoryResource($category);
     }
 
-    public function update(UpdateCategoryRequest $request, $categoryId)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $category = Category::find($categoryId);
-        if (!$category) return response()->json(['message' => 'Category not found.'], 404);
-
         $category->update($request->validated());
         return new CategoryResource($category);
     }

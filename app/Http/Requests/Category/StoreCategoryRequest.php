@@ -11,7 +11,7 @@ class StoreCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,15 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:categories,name',
+            'name'   => 'required|string|max:255|unique:categories,name',
+            'status' => 'nullable|in:active,inactive'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'status.in' => 'The status must be either active or inactive.'
         ];
     }
 }

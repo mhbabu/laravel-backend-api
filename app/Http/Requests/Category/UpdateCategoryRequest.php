@@ -11,7 +11,7 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +21,18 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $category = $this->route('category');
+
         return [
-            'name' => 'required|string|max:255|unique:categories,name,' . $this->route('category')->id,
+            'name'   => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'status' => 'required|in:active,inactive',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'status.in' => 'The status must be either active or inactive.',
         ];
     }
 }
