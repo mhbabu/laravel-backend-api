@@ -11,7 +11,7 @@ class UpdateProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,11 +23,19 @@ class UpdateProductRequest extends FormRequest
     {
         return [
             'title'        => 'sometimes|string|max:255|unique:products,title,' . $this->route('product')->id,
-            'image'        => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'categories'   => 'sometimes|array',
+            'status'       => 'required|in:active,inactive',
+            'categories'   => 'required|array',
             'categories.*' => 'exists:categories,id',
-            'features'     => 'sometimes|array',
-            'features.*'   => 'string|max:255'
+            'features'     => 'required|array',
+            'features.*'   => 'string|max:255',
+           'image'         => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'status.in' => 'The status must be either active or inactive.'
         ];
     }
 }

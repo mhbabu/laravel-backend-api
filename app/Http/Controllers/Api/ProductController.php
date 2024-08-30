@@ -7,7 +7,7 @@ use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -19,22 +19,26 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request)
     {
-        $product = Product::create($request->validated());
-        $product->categories()->sync($request->categories);
+        try {
+            DB::beginTransaction();
+            $product = Product::create($request->validated());
+            $product->categories()->sync($request->categories);
 
-        foreach ($request->features as $feature) {
-            $product->features()->create(['name' => $feature]);
+            foreach ($request->features as $feature) {
+                $product->features()->create(['name' => $feature]);
+            }
+
+            if ($request->hasFile('image')) {
+                $product->addMediaFromRequest('image')->toMediaCollection('product_images');
+            }
+            $product->load('media');
+
+            DB::commit();
+            return new ProductResource($product->load('categories', 'features'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Failed to create product'], 500);
         }
-
-        // Handle image upload with Spatie Media Library
-        if ($request->hasFile('image')) {
-            $product->addMediaFromRequest('image')->toMediaCollection('product_images');
-        }
-
-        // Ensure media is processed
-        $product->load('media');
-
-        return new ProductResource($product->load('categories', 'features'));
     }
 
     public function show($productId)
@@ -45,29 +49,29 @@ class ProductController extends Controller
         return new ProductResource($product->load('categories', 'features'));
     }
 
-    public function update(UpdateProductRequest $request, $productId)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $product = Product::find($productId);
-        if (!$product) return response()->json(['message' => 'Product not found.'], 404);
+        try {
+            DB::beginTransaction();
+            $product->update($request->validated());
+            $product->categories()->sync($request->categories);
+            $product->features()->delete();
 
-        $product->update($request->validated());
-        $product->categories()->sync($request->categories);
+            foreach ($request->features as $feature) {
+                $product->features()->create(['name' => $feature]);
+            }
+            if ($request->hasFile('image')) {
+                $product->clearMediaCollection('product_images');
+                $product->addMediaFromRequest('image')->toMediaCollection('product_images');
+            }
+            $product->load('media');
+            DB::commit();
 
-        $product->features()->delete();
-        foreach ($request->features as $feature) {
-            $product->features()->create(['name' => $feature]);
+            return new ProductResource($product->load('categories', 'features'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Failed to update product'], 500);
         }
-
-        // Handle image upload with Spatie Media Library
-        if ($request->hasFile('image')) {
-            $product->clearMediaCollection('product_images');
-            $product->addMediaFromRequest('image')->toMediaCollection('product_images');
-        }
-
-        // Ensure media is processed
-        $product->load('media');
-
-        return new ProductResource($product->load('categories', 'features'));
     }
 
     public function destroy($productId)

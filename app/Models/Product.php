@@ -11,7 +11,7 @@ class Product extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = ['title'];
+    protected $fillable = ['title', 'status'];
 
     public function categories() {
         return $this->belongsToMany(Category::class);

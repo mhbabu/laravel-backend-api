@@ -11,7 +11,7 @@ class StoreProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,11 +23,19 @@ class StoreProductRequest extends FormRequest
     {
         return [
             'title'        => 'required|string|max:255|unique:products,title',
-            'image'        => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'status'       => 'required|in:active,inactive',
             'categories'   => 'required|array',
             'categories.*' => 'exists:categories,id',
             'features'     => 'required|array',
             'features.*'   => 'string|max:255',
+            'image'        => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'status.in' => 'The status must be either active or inactive.'
         ];
     }
 }
